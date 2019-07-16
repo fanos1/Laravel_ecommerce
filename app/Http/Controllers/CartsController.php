@@ -112,7 +112,7 @@ class CartsController extends Controller
             $cID = $rows[0]->id; //CART id
             
             $cart = Cart::find($cID);
-            $cart->quantity = $cart->quantity + 1;
+            $cart->quantity = $cart->quantity + 1; // Add 1 more
             $cart->save();
             
         } else { // INSERT new Row Record

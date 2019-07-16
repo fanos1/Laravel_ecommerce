@@ -3,23 +3,29 @@
 @section('content')
 
 <div class="container">
-<style type="text/css">
-    .panel-title {
-    display: inline;
-    font-weight: bold;
-    }
-    .display-table {
-        display: table;
-    }
-    .display-tr {
-        display: table-row;
-    }
-    .display-td {
-        display: table-cell;
-        vertical-align: middle;
-        width: 61%;
-    }
-</style>
+    <style type="text/css">
+        .panel-title {
+        display: inline;
+        font-weight: bold;
+        }
+        .display-table {
+            display: table;
+        }
+        .display-tr {
+            display: table-row;
+        }
+        .display-td {
+            display: table-cell;
+            vertical-align: middle;
+            width: 61%;
+        }
+    </style>
+
+    <div class="row">
+        <div class="col-md-12">
+            <p>CUSTOMER ID::  {!! $customer->id !!} </p>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-md-6 col-md-offset-3">

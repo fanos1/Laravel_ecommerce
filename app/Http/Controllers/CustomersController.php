@@ -57,8 +57,8 @@ class CustomersController extends Controller
 
         $customer->save();
 
-        return view('frontend.billing', compact('customer') );        
-        // return redirect(action('CartsController@index') )->with('status', 'Item added to basket');
+        // return view('frontend.billing', compact('customer') );        
+        return redirect(action('StripeBillingController@create', compact('customer')) );
         
     }
 

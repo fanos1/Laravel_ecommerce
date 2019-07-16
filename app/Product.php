@@ -41,5 +41,11 @@ class Product extends Model
 		// this is belongsTo()
 	}
 
+	// a Product belongs to mANY in many ORDERcONET
+	public function ordercontents()
+    {
+        return $this->belongsToMany('App\OrderContent');
+    }
+
 	
 }
