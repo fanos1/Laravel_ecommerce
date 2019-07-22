@@ -83,13 +83,14 @@ Route::get('/shop/{slug?}', 'FrontController@show'); // show Single product
 // CART
 Route::get('/cart', 'CartsController@index'); // 
 Route::get('/cart/create', 'CartsController@store'); // add to cart
-Route::get('/cart/destroy/{id}', 'CartsController@destroy'); // add to cart
-//Route::get('/cart/{user_session_id}/', 'CartsController@show'); // add to cart
+Route::get('/cart/destroy/{id}', 'CartsController@destroy'); // DELETe single Caart item
 
 
 // Checkout
-Route::get('/checkout', 'CustomersController@create'); // Show Form
-Route::post('/checkout', 'CustomersController@store'); // POST Form
+//Route::get('/checkout', 'CustomersController@create'); // Show Form
+Route::get('/checkout', 'CheckoutController@create'); // Show Form
+//Route::post('/checkout', 'CustomersController@store'); // POST Form
+Route::post('/checkout', 'CheckoutController@store'); // POST Form
 
 
 //billing : Stripe 

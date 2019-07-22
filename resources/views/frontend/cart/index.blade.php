@@ -7,9 +7,8 @@
     		
         <div class="col-md-12">
             <h2>Shoppint cart content</h2>
-            
-            @isset($cart)
-							
+            <?php // dd($cart); ?>
+
 				@if($cart === null )
 					<h2>empty cart</h2>
 				@else
@@ -54,16 +53,18 @@
 						            </form>						            
 			        			</td>
 			        		</tr>	
-			        		<?php $total += $cartRow->price * $cartRow->quantity; ?>        	
+			        		<?php 
+			        			$total += $cartRow->price * $cartRow->quantity; 
+			        		?>        	
 						@endforeach							
 							<tr>
+								
+								<td><h4>Shipping:  £{!! env('SHIPPING_FEE') / 100 !!} </h4> </td>
 								<td><h4>Grand Total: £{!! number_format($total, 2) !!} </h4></td>
-								<td><button class="btn btn-success">Checkout</button></td>
+								<td><a href="/checkout" class="btn btn-success">Checkout</a></td>
 							</tr>
 					</table>
 				@endif	
-
-            @endisset
 
 
 

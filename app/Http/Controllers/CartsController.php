@@ -12,6 +12,8 @@ use App\Cart;
 use App\Product;
 use App\Size;
 
+use Illuminate\Support\Facades\Cookie;
+
 class CartsController extends Controller
 {
     /**
@@ -20,43 +22,25 @@ class CartsController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {      
-
-        if (isset($_COOKIE['SESSION']) && (strlen($_COOKIE['SESSION']) === 32)) 
+    {    
+        $uid = Cookie::get('SESSION');
+                  
+        if( $uid !== null ) // if isset()
         {
-            $uid = $_COOKIE['SESSION'];
-            // $ticket =   Ticket::whereSlug($slug)->firstOrFail();
-            // $comments   =   $ticket->comments()->get();
-            
-             
-            // $products = Product::all(); // Fetch prod as well
-            // $x = $cart->products->pluck('product_id')->toArray();
-            // $post->categories()->sync($request->get('categories'));
-
-            /* 
-            $cart = Cart::join('products', 'products.id', '=', 'carts.product_id')
-                ->join('sizes', 'sizes.id', '=', 'products.size_id')
-                ->where('carts.user_session_id', '=', $uid)
-                ->get();
-
-            // $cart = Cart::with('product')->where('user_session_id', $uid)->get(); // OK
-            */
-            // $cart = Cart::with(['product', 'size'])->where('user_session_id', $uid)->get(); // OK
-
-           
+            // $cart = Cart::with(['product', 'size'])->where('user_session_id', $uid)->get();           
             $cart = DB::table('carts')
                 ->join('products', 'products.id', '=', 'carts.product_id')
                 ->join('sizes', 'sizes.id', '=', 'products.size_id')
                 ->where('carts.user_session_id', '=', $uid)
                 ->select('carts.id AS cID', 'carts.*', 'products.*', 'sizes.*')
                 ->get();
-                
-                        
+                                        
         } else {
             $cart = null; //empty cart if user requests /cart Page before adding item
         }
         
-        return view('frontend.cart.index', compact('cart'));
+        // return view('frontend.cart.index', compact('cart') )->withCookie($_COOKIE['SESSION'] );
+        return view('frontend.cart.index', compact('cart') );
     }
 
     /**
@@ -77,21 +61,17 @@ class CartsController extends Controller
      */
     public function store(Request $request)
     {
-        // Check for, or create, a user session:
-        if (isset($_COOKIE['SESSION']) && (strlen($_COOKIE['SESSION']) === 32)) {
-            $uid = $_COOKIE['SESSION'];
+        
+        if( Cookie::get('SESSION') !== null ) { //
+            $uid = Cookie::get('SESSION');
         } else {
             $uid = openssl_random_pseudo_bytes(16);
             $uid = bin2hex($uid);
         }
-        setcookie('SESSION', $uid, time()+(60*60*24*1) ); // keep cookie 1 day
+        $cookieVal = Cookie::queue('SESSION', $uid, 86400);
+         
 
-        /* 
-        $rows = DB::table('carts')->where([
-            ['user_session_id', '=', $uid],
-            ['product_id', '=', $pID],
-        ])->orderBy('name', 'desc')->get();
-        */
+        // Get Cart contents
         $rows = Cart::where([
             ['user_session_id', '=', $uid],
             ['product_id', '=', $request->get('product_id')],
@@ -117,17 +97,17 @@ class CartsController extends Controller
             
         } else { // INSERT new Row Record
             
-             $cart =  new Cart(array(
+            $cart =  new Cart(array(
                 'user_session_id' => $uid,
                 'product_id' => $request->get('product_id'),
                 'quantity' => 1,
             ));
-
             $cart->save();
         }
 
-        // return view('frontend.cart.show');
-        return redirect(action('CartsController@index') )->with('status', 'Item added to basket');
+        //return redirect(action('CartsController@index') )->with('status', 'Item added to basket')->withCookie($c );
+
+       return redirect(action('CartsController@index') )->with('status', 'Item added to basket');
 
         // return  redirect(action('TicketsController@edit', $ticket->slug))->with('status', 'The ticket  '.$slug.'   has been    updated!');
     }
@@ -140,12 +120,7 @@ class CartsController extends Controller
      */
     public function show($user_session_id)
     {
-        $cart = Cart::whereId($user_session_id)->firstOrFail();
         
-        $products = Product::all(); // Fetch prod as well
-        $x = $cart->products->pluck('id')->toArray(); // Gets all prod_id which this cart is associated
-
-        return view('frontend.cart.show', compact('cart', 'x'));
     }
 
 
@@ -180,14 +155,7 @@ class CartsController extends Controller
      */
     public function destroy($id)
     {
-        $ticket = Cart::whereId($id)->firstOrFail();
-        /* 
-        $rows = Cart::where([
-            ['user_session_id', '=', $_COOKIE['SESSION'] ],
-            ['id', '=', $id],
-        ])->firstOrFail(); 
-        */
-       
+        $ticket = Cart::whereId($id)->firstOrFail();        
         $ticket->delete();
 
         return redirect('/cart')->with('status', 'The item has been deleted!');

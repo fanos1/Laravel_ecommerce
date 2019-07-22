@@ -13,6 +13,10 @@ use Stripe\Customer;
 
 use App\Cart;
 use App\Order;
+use App\OrderContent;
+use Illuminate\Support\Facades\Cookie;
+
+use Illuminate\Support\Facades\DB;
 
 class StripeBillingController extends Controller
 {
@@ -33,7 +37,17 @@ class StripeBillingController extends Controller
      */
     public function create()
     {
-        return view('fontend.billing'); // show FORM
+        $uid = Cookie::get('SESSION');
+        //dd($customer);
+
+        if (isset($uid) && (strlen($uid) === 32)) {
+            // only users who come from Cart page can proceed
+            //return view('frontend.billing'); // show FORM            
+            return view('frontend.billing', compact('customer') );  
+        } else {
+            exit('COOKie not set');
+        }
+        
     }
 
     /**
@@ -44,60 +58,54 @@ class StripeBillingController extends Controller
      */
     public function store(StripeFormRequest $request)
     {
-
-        // add_order()
-        // Before chargin, we need to add ORDER
-
-        //1. add_order($_SESSION['customer_id'], $uid, $shipping,  $cc_last_four)
-        //1. Select all() from Cart WHERE c.user_session_id = :uid
-        //3, Loop through each() cartRow, and INSERT each cartRow info into order_conten TABLE
-        //4. SELECT SUM(quantity*price_per) AS subtotal FROM order_contents WHERE order_id=$lastOrderId
-
-        //1- Select Cart Items
-        // $uid = $_COOKIE['SESSION'];        
-        $cartRows = Cart::where([
-            ['user_session_id', '=', $_COOKIE['SESSION']],
-        ])->get();
-
-        exit('StripeBillingController icinde 62');
-
-        //2- AddOrder() :: save the order
+        // $uid = $_COOKIE['SESSION'];
+         $uid = Cookie::get('SESSION');
+         $custId = session('customer_id');
+        //dd($uid);
+     
+       
+        // 1:: AddOrder() :: save the order
         $order = new Order(array(
-            'customer_id' => $_SESSION['customer_id'],
-            // 'total' => $request->get(''),
-            'shipping' => 1,
-            // 'credit_card_number' => 123, //nullable(), stripe payment. no need to store card            
-
+            'customer_id' => $custId,
+            'total' => 0, //Total is 0, will update with following Query
+            'shipping' => env('SHIPPING_FEE'),
+            // 'credit_card_number' => 123, //nullable(), stripe payment. no need to store card 
         ));
         $order->save();
 
+        // 2:: get shopping 
+        $cartRows = DB::table('carts')
+        ->join('products', 'products.id', '=', 'carts.product_id')
+        ->where('carts.user_session_id', '=', $uid)
+        ->select('carts.id AS cID', 'carts.*', 'products.price')
+        ->get();
         
-        // 3- Save each() Cart row into order_content()
-        // I dont want to Loop() and keep calling Many times UPDATE query
+        $data = []; 
+        // Create arrays for each row, for the order_content table
+        foreach ($cartRows as $key => $value) 
+        { 
+            $aR = [
+                'order_id' => $order->id,
+                'product_id' => $value->product_id,
+                'quantity' => $value->quantity,
+                'item_price' => $value->price,
+            ];
+            array_push($data, $aR); // Add to $data Array, the new array
+            // print_r($value);
+            // echo "<h3>". $value->cID."</h3>";   
+        }
 
-        /* ALTERNATIVE IS CREATE ARRAY, AND pass this Arr to OrderContent()
-         $orderProducts = [];
-            foreach ($cart->items as $productId => $item) {
-                $orderProducts[] = [
-                    'order_id' => $order->id,
-                    'product_id' => $productId
-                    'quantity' => $item['qty']
-                ];
-            }
-            OrderProduct::insert($orderProducts);
-       
-        $data = array(
-            array('user_id'=>'Coder 1', 'subject_id'=> 4096),
-            array('user_id'=>'Coder 2', 'subject_id'=> 2048),
-            //...
-        );
-        Model::insert($data); // Eloquent approach
-        DB::table('table')->insert($data); // Query Builder approach    
-        */
+        // 3:: Add to content tabel
+        OrderContent::insert($data);
 
+        // SELECT SUM(quantity*price_per) AS subtotal 
+        //      FROM order_contents WHERE order_id=$lastOrderId
+
+        
+        
         // no validation ????
         // credit card info never comes to our server, STRIPE sends token instead
-        // We can validate the stripeToken
+        // We can validate the stripeToken only
 
 
         Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
@@ -143,8 +151,7 @@ class StripeBillingController extends Controller
             
         } else { // Charge was not paid!
             $message = $charge->response_reason_text;
-            echo "<h3>268</h3>";
-            
+            echo "<h3>268</h3>";            
             exit($message);
         }
         

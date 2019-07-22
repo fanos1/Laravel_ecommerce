@@ -21,14 +21,9 @@
         }
     </style>
 
-    <div class="row">
-        <div class="col-md-12">
-            <p>CUSTOMER ID::  {!! $customer->id !!} </p>
-        </div>
-    </div>
 
     <div class="row">
-        <div class="col-md-6 col-md-offset-3">
+        <div class="col-md-6">
             <div class="panel panel-default credit-card-box">
                 <div class="panel-heading display-table" >
                     <div class="row display-tr" >
@@ -52,7 +47,7 @@
                         data-stripe-publishable-key="{{ env('STRIPE_KEY') }}" id="payment-form">
 
                           <input type="hidden" name="_token" value="{!! csrf_token() !!}">
-  
+                          
                         <div class='form-row row'>
                             <div class='col-xs-12 form-group required'>
                                 <label class='control-label'>Name on Card</label> 
@@ -103,6 +98,10 @@
                     </form>
                 </div>
             </div>        
+        </div>
+
+        <div class="col-md-6">
+           
         </div>
     </div>
       
