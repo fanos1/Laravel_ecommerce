@@ -9,7 +9,7 @@
             <h2>Shoppint cart content</h2>
             <?php // dd($cart); ?>
 
-				@if($cart === null )
+				@if($cart === null || $cart->isEmpty() )
 					<h2>empty cart</h2>
 				@else
 					<table class="table">
@@ -38,8 +38,8 @@
 			        			<td> {{ $cartRow->title }}
 			        			<td>{{ $cartRow->product_id }}</td>
 			        			<td>{{ $cartRow->quantity }}</td>		
-			        			<td>{{ $cartRow->price }}</td>
-			        			<td>{{ number_format($cartRow->price * $cartRow->quantity, 2) }}</td>	        			
+			        			<td>£{{ number_format($cartRow->price /100, 2) }}</td>
+			        			<td>£{{ number_format(($cartRow->price/100) * $cartRow->quantity, 2) }}</td>	        			
 			        			<?php  // <td> {!! $cartRow->product->size_id !!} </td> ?>
 			        			<td> {{ $cartRow->s_name }} </td>
 			        			<td> 
@@ -54,13 +54,16 @@
 			        			</td>
 			        		</tr>	
 			        		<?php 
-			        			$total += $cartRow->price * $cartRow->quantity; 
+			        			$total += $cartRow->price/100 * $cartRow->quantity; 
 			        		?>        	
 						@endforeach							
 							<tr>
-								
-								<td><h4>Shipping:  £{!! env('SHIPPING_FEE') / 100 !!} </h4> </td>
-								<td><h4>Grand Total: £{!! number_format($total, 2) !!} </h4></td>
+								<?php 
+									$shipping = env('SHIPPING_FEE') / 100;
+									$Grand= $total+$shipping;
+								?>
+								<td><h4>Shipping:  £{!! number_format($shipping, 2)  !!} </h4> </td>
+								<td><h4>Grand Total: £{!! number_format($Grand, 2) !!} </h4></td>
 								<td><a href="/checkout" class="btn btn-success">Checkout</a></td>
 							</tr>
 					</table>

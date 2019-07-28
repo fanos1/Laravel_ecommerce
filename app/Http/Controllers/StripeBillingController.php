@@ -38,7 +38,6 @@ class StripeBillingController extends Controller
     public function create()
     {
         $uid = Cookie::get('SESSION');
-        //dd($customer);
 
         if (isset($uid) && (strlen($uid) === 32)) {
             // only users who come from Cart page can proceed
@@ -58,11 +57,20 @@ class StripeBillingController extends Controller
      */
     public function store(StripeFormRequest $request)
     {
-        // $uid = $_COOKIE['SESSION'];
-         $uid = Cookie::get('SESSION');
-         $custId = session('customer_id');
-        //dd($uid);
+        // dd($request->all() ); // No STRIPE token at this point 
+
+        $uid = Cookie::get('SESSION');
+        $custId = session('customer_id');
      
+        $token = $request->input('token');
+        $stripeToken = $request->input('stripeToken');
+
+        //echo "<h3> $token </h3>";
+        //echo "<h3> $stripeToken </h3>";
+        //exit();
+        dd($request->all() );
+        
+        
        
         // 1:: AddOrder() :: save the order
         $order = new Order(array(
@@ -72,6 +80,9 @@ class StripeBillingController extends Controller
             // 'credit_card_number' => 123, //nullable(), stripe payment. no need to store card 
         ));
         $order->save();
+
+        
+        $lastOrderId = $order->id;
 
         // 2:: get shopping 
         $cartRows = DB::table('carts')
@@ -85,28 +96,41 @@ class StripeBillingController extends Controller
         foreach ($cartRows as $key => $value) 
         { 
             $aR = [
-                'order_id' => $order->id,
+                'order_id' => $lastOrderId,
                 'product_id' => $value->product_id,
                 'quantity' => $value->quantity,
                 'item_price' => $value->price,
             ];
-            array_push($data, $aR); // Add to $data Array, the new array
-            // print_r($value);
-            // echo "<h3>". $value->cID."</h3>";   
+            array_push($data, $aR); // Add to $data Array, the new array            
         }
+
 
         // 3:: Add to content tabel
         OrderContent::insert($data);
 
-        // SELECT SUM(quantity*price_per) AS subtotal 
-        //      FROM order_contents WHERE order_id=$lastOrderId
-
+        // Fetch the quantity and item_price from ORDER_CONTEN table
+        $orderCont = OrderContent::select('quantity', 'item_price')->where('order_id', $lastOrderId)->get();
         
+        //  Calculate the total for this ORDER
+        $grandTotal = 0;
+        foreach ($orderCont as $key => $value) {
+            echo "<h2>$key :: $value</h2>"; // 0 :: {"quantity":1,"item_price":13}
+            $grandTotal = $grandTotal + ($value->item_price * $value->quantity);
+        }
+
+
+        // 5 UPDATE total Column
+        $orderRow = Order::find($lastOrderId);
+        $orderRow->total = $grandTotal;
+        $orderRow->save();    
+
+        //echo "<h3>".$grandTotal."</h3>";
+        //print_r($grandTotal); // 013
+        //exit();
         
         // no validation ????
         // credit card info never comes to our server, STRIPE sends token instead
         // We can validate the stripeToken only
-
 
         Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
 
@@ -115,18 +139,19 @@ class StripeBillingController extends Controller
           'email' => request('stripeEmail'),
           'source' => request('stripeToken')
         ]); 
-        
+         
 
         Charge::create([
           'customer' => $customer->id,
-          'amount'  => 2500,
+          'amount'  => 50,
           'currency'    => 'gbp'
 
         ]);
         */
+       
 
         $charge = Stripe\Charge::create ([
-            "amount" => 100 * 100,
+            "amount" => 40,
             "currency" => "gbp",
             //"source" => $request->stripeToken,
             'source' => $request->get('stripeToken'),

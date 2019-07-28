@@ -44,39 +44,55 @@
   
                     <form role="form" action="{{ route('stripe.post') }}" method="post" 
                         class="require-validation" data-cc-on-file="false"
-                        data-stripe-publishable-key="{{ env('STRIPE_KEY') }}" id="payment-form">
+                         id="billing_form">
 
                           <input type="hidden" name="_token" value="{!! csrf_token() !!}">
                           
+                        <!--   
                         <div class='form-row row'>
                             <div class='col-xs-12 form-group required'>
                                 <label class='control-label'>Name on Card</label> 
                                 <input class='form-control' size='4' type='text'>
                             </div>
-                        </div>
-  
+                        </div> 
+                        -->                    
+
+                        <!-- 
+                        <div class='form-row row'>
+                            <div class='col-xs-12 col-md-6 form-group'>
+                                <label class='control-label'>First name</label>  
+                                <input type="text" name="cc_first_name" class="form-control" /> 
+                            </div>
+                            <div class='col-xs-12 col-md-6 form-group'>
+                                <label class='control-label'>last nameh</label> 
+                                <input type="text" name="cc_last_name" class="form-control"  /> 
+                            </div>
+                        </div> 
+                        -->
+                                                        
+
                         <div class='form-row row'>
                             <div class='col-xs-12 form-group card required'>
-                                <label class='control-label'>Card Number</label> 
-                                <input autocomplete='off' class='form-control card-number' 
-                                size='20' type='text'>
+                                <label class='control-label'>Card Number</label>
+                                <input type="text" id="cc_number" autocomplete="off" 
+                                value="6011111111111117" class='form-control' />    
                             </div>
                         </div>
-  
                         <div class='form-row row'>
                             <div class='col-xs-12 col-md-4 form-group cvc required'>
                                 <label class='control-label'>CVC</label> 
-                                <input autocomplete='off' class='form-control card-cvc' placeholder='ex. 311' size='4' type='text'>
+                                <input type="text" id="cc_cvv" class="form-control" 
+                                autocomplete="off" placeholder='ex. 311' size='4' value="123" />
                             </div>
                             <div class='col-xs-12 col-md-4 form-group expiration required'>
-                                <label class='control-label'>Expiration Month</label> 
-                                <input class='form-control card-expiry-month' placeholder='MM' size='2'
-                                    type='text'>
+                                <label class='control-label'>Expiration Month</label>                         
+                                <input type="text" id="cc_exp_month" class="form-control" 
+                                autocomplete="off" placeholder='MM' size='2' >
                             </div>
                             <div class='col-xs-12 col-md-4 form-group expiration required'>
-                                <label class='control-label'>Expiration Year</label> 
-                                <input class='form-control card-expiry-year' placeholder='YYYY' size='4'
-                                    type='text'>
+                                <label class='control-label'>Expiration Year</label>
+                                <input type="text" id="cc_exp_year" class="form-control" 
+                                autocomplete="off" placeholder='YYYY' size='4' />
                             </div>
                         </div>
   
@@ -107,65 +123,93 @@
       
 </div>
 
+
+
 <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
-  
+     
 <script type="text/javascript">
-$(function() {
-
-    var $form = $(".require-validation");
-
-    $('form.require-validation').bind('submit', function(e) {
-        var $form         = $(".require-validation"),
-        inputSelector = ['input[type=email]', 'input[type=password]',
-                         'input[type=text]', 'input[type=file]',
-                         'textarea'].join(', '),
-        $inputs       = $form.find('.required').find(inputSelector),
-        $errorMessage = $form.find('div.error'),
-        valid         = true;
-        $errorMessage.addClass('hide');
+    Stripe.setPublishableKey('pk_test_3EVgSTvMrg5iuXal0he65oEi');
+</script>
  
-        $('.has-error').removeClass('has-error');
+<script type="text/javascript">
+        // Watch for the document to be ready:
+    $(function() {
 
-        $inputs.each(function(i, el) {
-          var $input = $(el);
-          if ($input.val() === '') {
-            $input.parent().addClass('has-error');
-            $errorMessage.removeClass('hide');
-            e.preventDefault();
-          }
-        });
-  
-        if (!$form.data('cc-on-file')) {
-          e.preventDefault();
-          Stripe.setPublishableKey($form.data('stripe-publishable-key'));
-          Stripe.createToken({
-            number: $('.card-number').val(),
-            cvc: $('.card-cvc').val(),
-            exp_month: $('.card-expiry-month').val(),
-            exp_year: $('.card-expiry-year').val()
-          }, stripeResponseHandler);
-        }
-  
-    });
+        var $form = $("#billing_form");
 
-  
+      $('#billing_form').submit(function() {
+
+            var error = false;
+
+            // disable the submit button to prevent repeated clicks:
+            $('input[type=submit]', this).attr('disabled', 'disabled');
+
+            // Get the values:
+            var cc_number = $('#cc_number').val();
+            var cc_cvv = $('#cc_cvv').val();
+            var cc_exp_month = $('#cc_exp_month').val(), cc_exp_year = $('#cc_exp_year').val();
+
+            // Validate the number:
+            if (!Stripe.validateCardNumber(cc_number)) {
+                error = true;
+                reportError('The credit card number appears to be invalid.');
+            }
+
+            // Validate the CVC:
+
+            // Validate the expiration:
+            if (!Stripe.validateExpiry(cc_exp_month, cc_exp_year)) {
+                error = true;
+                reportError('The expiration date appears to be invalid.');
+            }
+
+            if (!error) {
+                
+                // Stripe.setPublishableKey($form.data('stripe-publishable-key'));                
+
+                // Get the Stripe token:
+                Stripe.createToken({
+                    number: cc_number,
+                    cvc: cc_cvv,
+                    exp_month: cc_exp_month,
+                    exp_year: cc_exp_year
+                }, stripeResponseHandler);
+            }
+
+            // prevent the form from submitting with the default action
+            return false;
+
+        }); // form submission
+
+    }); // document ready.
+
+
+    // Function handles the Stripe response:
     function stripeResponseHandler(status, response) {
+
+        // Check for an error:
         if (response.error) {
-            $('.error')
-                .removeClass('hide')
-                .find('.alert')
-                .text(response.error.message);
-        } else {
-            // token contains id, last4, and card type
-            var token = response['id'];
-            // insert the token into the form so it gets submitted to the server
-            $form.find('input[type=text]').empty();
-            $form.append("<input type='hidden' name='stripeToken' value='" + token + "'/>");
-            $form.get(0).submit();
+            reportError(response.error.message);
+        } else { // No errors, submit the form.
+          var billing_form = $('#billing_form');
+          // token contains id, last4, and card type
+          var token = response.id;
+          // insert the token into the form so it gets submitted to the server
+          billing_form.append("<input type='hidden' name='token' value='" + token + "' />");
+          // and submit
+          billing_form.get(0).submit();
         }
+
     }
-  
-});
+
+    function reportError(msg) {
+        // Show the error in the form:
+        $('#error_span').text(msg);
+        // re-enable the submit button:
+        $('input[type=submit]', this).attr('disabled', false);
+        return false;
+    }
+
 </script>
 
 @endsection

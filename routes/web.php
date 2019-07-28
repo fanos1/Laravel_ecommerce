@@ -70,6 +70,10 @@ Route::group(
 		Route::get('sizes/{id}/edit',	'SizesController@edit');
 		Route::post('sizes/{id}/edit',	'SizesController@update');
 			
+		// admin orders
+		Route::get('orders',	'OrdersController@index'); // show all
+		Route::get('orders/{id}/show',	'OrdersController@show'); // show SINGLE
+		
 				
 	}
 

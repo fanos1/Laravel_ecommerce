@@ -34,6 +34,11 @@
 				<a href="/admin/sizes/create" class="btn btn-primary">Create Size</a>
 			</div>
 
+			<div>
+				<h4>Orders </h4>
+				<a href="/admin/orders" class="btn btn-primary">All all Orders</a>
+			</div>
+
 		</div>	
    </div>		
 

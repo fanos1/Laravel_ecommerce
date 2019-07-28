@@ -12,11 +12,11 @@ class OrderContent extends Model
     // this ORDER hasOne/belongsTo 1 product
     // the ORDER_content Row with ID 1, contains only 1 PRODUCT
     // EACH orderContent Row will have unique 1 PRODUCT
-    public function product()
+    public function products()
 	{
 		// return $this->hasOne('App\Customer','id');
-	    return $this->belongsTo('App\Product', 'product_id');
-	    //With this Relation, we should be able to use $order->customer
+	    // return $this->belongsTo('App\Product', 'product_id');
+        return $this->hasMany('App\Product', 'product_id');
 	}
 
     // this ORDER_CONTENT

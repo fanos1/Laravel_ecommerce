@@ -17,8 +17,8 @@ class Order extends Model
 	}
 
 	// this ORDER has Many
-	public function orderContents() {
-		return $this->hasMany('App\orderContents');
+	public function order_contents() {
+		return $this->hasMany('App\orderContent');
 	}
 
 }
