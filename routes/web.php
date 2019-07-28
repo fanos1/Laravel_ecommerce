@@ -84,6 +84,9 @@ Route::get('/', 'FrontController@home');
 Route::get('/shop',	'FrontController@index'); // show All products
 Route::get('/shop/{slug?}', 'FrontController@show'); // show Single product
 
+Route::get('/categories', 'FrontController@categories'); // show All categ
+Route::get('/categories/{slug?}', 'FrontController@productsForThisCateg'); // 
+
 // CART
 Route::get('/cart', 'CartsController@index'); // 
 Route::get('/cart/create', 'CartsController@store'); // add to cart

@@ -17,7 +17,6 @@
 
 
 
-<!-- hidden on mobile -->
 <div id="desktop-nav">
 	<nav class="container" id="top">
 		<div class="col-12">
@@ -35,6 +34,7 @@
 				<li><a href="/" title="home page">Home</a></li>
 				<li><a href="/cart" title="home page">Cart</a></li>
 				<li><a href="/shop" title="shop page">Shop</a></li>
+				<li><a href="/categories" title="shop page">Categories</a></li>
 				<?php 
 				/* 
 				@foreach(App\Page::all() as $page)

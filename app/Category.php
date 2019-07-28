@@ -11,6 +11,6 @@ class Category extends Model
 
 	public	function products()
 	{
-		return	$this->belongsToMany('App\products')->withTimestamps();
+		return	$this->belongsToMany('App\Product')->withTimestamps();
 	}
 }
