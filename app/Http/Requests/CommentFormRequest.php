@@ -23,8 +23,22 @@ class CommentFormRequest extends FormRequest
      */
     public function rules()
     {
+        $this->sanitize();
+
         return [
             'content'=> 'required|min:3',
         ];
     }
+
+    public function sanitize()
+    {
+        $input = $this->all();
+
+       
+        $input['content'] = filter_var($input['content'], FILTER_SANITIZE_STRING);
+        
+        // replace the provided form input with the filtered version
+        $this->replace($input);     
+    }
+
 }

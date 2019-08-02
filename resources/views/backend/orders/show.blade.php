@@ -1,4 +1,4 @@
-@extends('master')
+@extends('master-admin')
 @section('title', 'View a single order')
 @section('content')
 

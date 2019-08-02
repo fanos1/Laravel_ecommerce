@@ -19,7 +19,7 @@
 						<a href="{!! action('FrontController@show', $product->slug) !!}">
                             {!! $product->title !!}</a>
 					</div>
-                    
+                    <!-- <img class="img-responsive"  src="/images/{{ $product->img }}"  alt=""  /> -->
                     <?php
                     /*  
                     <div class="panel-body">

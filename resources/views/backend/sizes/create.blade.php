@@ -1,4 +1,4 @@
-@extends('master')
+@extends('master-admin')
 @section('title', 'Create A New Size')
 
 @section('content')

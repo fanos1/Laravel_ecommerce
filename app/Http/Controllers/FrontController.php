@@ -38,9 +38,7 @@ class FrontController extends Controller
 	{
 		$categories = Category::whereSlug($slug)->firstOrFail();
 		$productsForThisCateg = $categories->products()->get();
-
-		//$page = Page::whereSlug($slug)->firstOrFail();
-        //$articlesForThisPage = $page->articles()->get();
+		
 		return view('frontend.productspercateg', compact('productsForThisCateg') );
 	}
 

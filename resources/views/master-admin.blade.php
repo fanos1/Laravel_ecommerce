@@ -5,10 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title> @yield('title') </title>
-   
-    
-    <link rel="stylesheet" type="text/css" href="/css/main.css">
 
+    <!-- Material Design fonts 
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700">
+    -->
+    
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+
+
+    <!-- Bootstrap Material Design 
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap-material-design.css">
+    -->
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script>window.jQuery || document.write('<script src="js/jquery.js"><\/script>')</script>
@@ -17,7 +24,6 @@
 
 
 <body>
-<div id="wrapper">
 
 @include('shared.navbar')
 
@@ -38,6 +44,5 @@
     </script>
 -->
 
-</div>
 </body>
 </html>
