@@ -1,2 +1,2 @@
 # Laravel_ecommerce
-demo site using this application www.alphina.co.uk
+demo site using this application www.dalpina.co.uk
